@@ -1,7 +1,9 @@
- import 'package:event_planning_app/utils/app_assets.dart';
+ import 'package:event_planning_app/providers/app_theme_provider.dart';
+import 'package:event_planning_app/utils/app_assets.dart';
 import 'package:event_planning_app/utils/app_colors.dart';
 import 'package:event_planning_app/utils/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   static const String routName = 'splash_screen';
@@ -25,24 +27,27 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var themeProvider = Provider.of<AppThemeProvider>(context);
     var size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor:AppColors.whiteColor,
+      backgroundColor: themeProvider.appTheme == ThemeMode.dark
+          ? AppColors.darkBlueColor
+          : AppColors.whiteColor,
       body: Stack(
         children: [
           Center(
-            child: Image.asset(AppAssets.logoBg,
-              height: size.height * 0.25,
+            child: Image.asset(AppAssets.eventlyBg,
+              height: size.height * 0.10, // Further reduced from 0.15
               fit: BoxFit.contain,
             ),
           ),
           Positioned(
-            bottom: 50,
+            bottom: size.height * 0.05, // Adjusted for better spacing
             left: 0,
             right: 0,
             child: Center(
               child: Image.asset(AppAssets.routeBg,
-                height: size.height * 0.15, 
+                height: size.height * 0.10, // Increased from 0.05 as requested
                 fit: BoxFit.contain,
               ),
             ),
