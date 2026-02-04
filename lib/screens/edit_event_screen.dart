@@ -133,7 +133,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                             style: TextStyle(
                               color: isSelected 
                                   ? AppColors.whiteColor 
-                                  : AppColors.lightBlueColor,
+                                  : (isDark ? AppColors.whiteColor : AppColors.blackColor),
                               fontWeight: FontWeight.w500,
                             ),
                           ),

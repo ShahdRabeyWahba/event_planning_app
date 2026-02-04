@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_planning_app/Firebase_utils.dart';
+import 'package:event_planning_app/models/event.dart';
 import 'package:event_planning_app/l10n/app_localizations.dart';
 import 'package:event_planning_app/language/language_bottom_sheet.dart';
 import 'package:event_planning_app/providers/app_language_provider.dart';
 import 'package:event_planning_app/providers/app_theme_provider.dart';
-import 'package:event_planning_app/providers/favorite_provider.dart';
+import 'package:event_planning_app/providers/user_provider.dart';
 import 'package:event_planning_app/utils/app_colors.dart';
 import 'package:event_planning_app/utils/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +26,7 @@ class _HomeTabState extends State<HomeTab> {
     var localizations = AppLocalizations.of(context)!;
     var themeProvider = Provider.of<AppThemeProvider>(context);
     var languageProvider = Provider.of<AppLanguageProvider>(context);
+    var userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
       backgroundColor: themeProvider.isDarkMode()
@@ -56,16 +60,16 @@ class _HomeTabState extends State<HomeTab> {
                         style: TextStyle(
                           color: themeProvider.isDarkMode()
                               ? AppColors.whiteColor
-                              : AppColors.darkGrayColor, // Grey in Light Mode
+                              : AppColors.blackColor, // Changed from darkGrayColor to blackColor
                           fontSize: 14,
                         ),
                       ),
                       Text(
-                        "John Safwat",
+                        userProvider.currentUser?.name ?? "Guest",
                         style: TextStyle(
                           color: themeProvider.isDarkMode()
                               ? AppColors.whiteColor
-                              : Colors.black, // Black in Light Mode
+                              : AppColors.blackColor, // Changed from Colors.black to AppColors.blackColor
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
@@ -95,9 +99,7 @@ class _HomeTabState extends State<HomeTab> {
                             themeProvider.isDarkMode()
                                 ? Icons.nightlight_round
                                 : Icons.wb_sunny_outlined,
-                            color: themeProvider.isDarkMode()
-                                ? AppColors.whiteColor
-                                : AppColors.darkBgColor,
+                            color: AppColors.lightBlueColor,
                             size: 20,
                           ),
                         ),
@@ -163,48 +165,75 @@ class _HomeTabState extends State<HomeTab> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            _buildEventCard(
-              context,
-              localizations.jan21,
-              "Birthday",
-              localizations.birthdayDesc,
-              "assets/images/Birthday.png",
-            ),
-            _buildEventCard(
-              context,
-              localizations.jan22,
-              "Meeting",
-              localizations.meetingDesc,
-              "assets/images/Meeting.png",
-            ),
-            _buildEventCard(
-              context,
-              localizations.jan23,
-              "Exhibition",
-              localizations.exhibitionDesc,
-              "assets/images/Exhibition.png",
-            ),
-            _buildEventCard(
-              context,
-              localizations.jan24,
-              "Sport",
-              localizations.sport,
-              "assets/images/Sport.png",
-            ),
-            _buildEventCard(
-              context,
-              localizations.jan25,
-              "Sport",
-              localizations.bookClub,
-              "assets/images/Book Club.png",
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
+      body: StreamBuilder<QuerySnapshot<Event>>(
+        stream: FirebaseUtils.getEventCollection().snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+             return Center(child: Text("Something went wrong"));
+          }
+          var events = snapshot.data?.docs.map((e) => e.data()).toList() ?? [];
+          
+          // Filter by Category
+          // 0 is "All" in the buildCategoryItem list.
+          // CATEGORY NAMES in the ADD screen: [Book Club, Sport, Birthday, Meeting, Exhibition, Holiday, Workshop, Eating]
+          // CATEGORY NAMES in the HOME Tab: [All, Sport, Birthday, Meeting, Book Club, Holiday, Exhibition, Gaming, Workshop, Concert]
+          // !!! IMPORTANT: The category names and indices might not match perfectly between arrays.
+          // Better to filter by String name if the user selects a category.
+          
+          List<String> homeCategories = [
+             localizations.all, // 0
+             localizations.sport, // 1
+             localizations.birthday, // 2
+             localizations.meeting, // 3
+             localizations.bookClub, // 4
+             "Holiday", // 5
+             "Exhibition", // 6
+             "Gaming", // 7
+             "Workshop", // 8
+             "Concert" // 9
+          ];
+          
+          // Map Home Tab Index to Category Sting stored in FireStore
+          // Note: Add Screen Categories: [Book Club, Sport, Birthday, Meeting,          // MARK: CATEGORY FILTERING LOGIC START
+           if (selectedCategoryIndex != 0) {
+              String selectedCategoryName = homeCategories[selectedCategoryIndex];
+              // Handle translation discrepancies or just simple string match
+              // Assuming stored category string matches 'selectedCategoryName'
+              events = events.where((element) => element.category == selectedCategoryName).toList();
+           }
+          // MARK: CATEGORY FILTERING LOGIC END
+
+          // Sort by Date (and Time if possible, but date is String dd/MM/yyyy)
+          // Ideally date should be Timestamp, but logic currently uses String. 
+          // Simple string sort might fail for dates.
+          // Let's try to parse for sorting using a custom comparator.
+           events.sort((a, b) {
+              // Parse 'dd/MM/yyyy'
+              try {
+                List<String> aParts = a.date.split('/');
+                List<String> bParts = b.date.split('/');
+                DateTime aDate = DateTime(int.parse(aParts[2]), int.parse(aParts[1]), int.parse(aParts[0]));
+                DateTime bDate = DateTime(int.parse(bParts[2]), int.parse(bParts[1]), int.parse(bParts[0]));
+                return aDate.compareTo(bDate);
+              } catch (e) {
+                return 0;
+              }
+           });
+
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            itemCount: events.length,
+            itemBuilder: (context, index) {
+              return _buildEventCard(
+                context,
+                events[index],
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -217,11 +246,10 @@ class _HomeTabState extends State<HomeTab> {
     // Matching image for both modes: Blue themes
     Color selectedBgColor = isDark ? AppColors.lightBlueColor : AppColors.darkBgColor;
     
-    // Separate colors for icon and text as requested
-    Color iconColor = isSelected ? AppColors.whiteColor : (isDark ? AppColors.lightBlueColor : Colors.black);
-    Color textColor = isSelected ? AppColors.whiteColor : (isDark ? AppColors.whiteColor : Colors.black);
-    
-    Color borderColor = isDark ? AppColors.lightBlueColor : AppColors.darkBgColor;
+    // Unified Blue theme for unselected items in ALL modes
+    Color iconColor = isSelected ? AppColors.whiteColor : AppColors.lightBlueColor;
+    Color textColor = isSelected ? AppColors.whiteColor : (isDark ? AppColors.whiteColor : AppColors.blackColor);
+    Color borderColor = isSelected ? (isDark ? AppColors.lightBlueColor : AppColors.darkBgColor) : AppColors.lightBlueColor;
 
     return InkWell(
       onTap: () {
@@ -260,9 +288,16 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  Widget _buildEventCard(BuildContext context, String date, String title, String desc, String imagePath) {
+  Widget _buildEventCard(BuildContext context, Event event) {
     var themeProvider = Provider.of<AppThemeProvider>(context);
     bool isDark = themeProvider.isDarkMode();
+    
+    // Extract data
+    // Extract data
+    String date = event.date; 
+    String title = event.title;
+    // String desc = event.description; // Not used in card summary to save space/avoid clutter, or we can add it.
+    String imagePath = event.imagePath;
 
     // Color Refinements
     Color themeBlue = isDark ? AppColors.lightBlueColor : AppColors.darkBgColor;
@@ -290,7 +325,8 @@ class _HomeTabState extends State<HomeTab> {
       ),
       child: InkWell(
         onTap: () {
-          Navigator.pushNamed(context, AppRoutes.eventDetailsRoute);
+          // Navigate to details if needed
+           Navigator.pushNamed(context, AppRoutes.eventDetailsRoute, arguments: event);
         },
         child: Stack(
           children: [
@@ -319,7 +355,7 @@ class _HomeTabState extends State<HomeTab> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkBackgroundColor.withOpacity(0.9) : AppColors.whiteColor,
+                color: isDark ? AppColors.darkBackgroundColor.withValues(alpha: 0.9) : AppColors.whiteColor,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
@@ -330,7 +366,7 @@ class _HomeTabState extends State<HomeTab> {
                 children: [
                   Expanded(
                     child: Text(
-                      desc,
+                      title,
                       style: TextStyle(
                         color: isDark ? AppColors.whiteColor : Colors.black,
                         fontWeight: FontWeight.bold,
@@ -339,21 +375,20 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Consumer<FavoriteProvider>(
-                    builder: (context, favProvider, child) {
-                      bool isFavorite = favProvider.isFavorite(title);
-                      return InkWell(
-                        onTap: () {
-                          favProvider.toggleFavorite(title);
-                        },
-                        child: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: themeBlue,
-                          size: 24,
-                        ),
-                      );
-                    },
-                  ),
+                  // MARK: FAVORITE LOGIC START
+                   InkWell(
+                     onTap: () {
+                       // Toggle Favorite in Firestore
+                       event.isFavorite = !event.isFavorite;
+                       FirebaseUtils.updateEvent(event);
+                     },
+                     child: Icon(
+                       event.isFavorite ? Icons.favorite : Icons.favorite_border,
+                       color: AppColors.lightBlueColor,
+                       size: 24,
+                     ),
+                   )
+                  // MARK: FAVORITE LOGIC END
                 ],
               ),
             ),

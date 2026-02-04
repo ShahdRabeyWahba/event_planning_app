@@ -1,6 +1,6 @@
 class AppAssets {
   static const String routeBg ='assets/images/Logo.png';
-  static const String logoBg ='assets/images/appbar logo.png';
+  static const String logoBg ='assets/images/appbar_logo.png';
   static const String hotBg ='assets/images/hot-trending.png';
   static const String eventlyBg ='assets/images/Evently.png';
   static const String beingBg ='assets/images/being-creative.png';

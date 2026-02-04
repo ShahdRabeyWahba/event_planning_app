@@ -1,3 +1,5 @@
+import 'package:event_planning_app/Firebase_utils.dart';
+import 'package:event_planning_app/models/event.dart';
 import 'package:event_planning_app/l10n/app_localizations.dart';
 import 'package:event_planning_app/providers/app_theme_provider.dart';
 import 'package:event_planning_app/utils/app_colors.dart';
@@ -15,6 +17,9 @@ class EventDetailsScreen extends StatelessWidget {
     var themeProvider = Provider.of<AppThemeProvider>(context);
     var localizations = AppLocalizations.of(context)!;
     bool isDark = themeProvider.isDarkMode();
+    
+    // Retrieve Event from arguments
+    var event = ModalRoute.of(context)?.settings.arguments as Event;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackgroundColor : AppColors.whiteColor,
@@ -43,13 +48,17 @@ class EventDetailsScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit, color: AppColors.lightBlueColor),
             onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.editEventRoute);
+              Navigator.pushNamed(context, AppRoutes.editEventRoute, arguments: event);
             },
           ),
           IconButton(
             icon: const Icon(Icons.delete, color: AppColors.redColor),
             onPressed: () {
-              // Handle delete
+              FirebaseUtils.deleteEvent(event.id).then((value) {
+                 if(context.mounted){
+                    Navigator.pop(context);
+                 }
+              });
             },
           ),
         ],
@@ -65,8 +74,8 @@ class EventDetailsScreen extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/image_sport.png'), // Placeholder
+                image: DecorationImage(
+                  image: AssetImage(isDark ? event.imagePath.replaceAll('.png', ' dark.png') : event.imagePath),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -75,7 +84,7 @@ class EventDetailsScreen extends StatelessWidget {
             
             // Event Title
             Text(
-              "We're going to play football", // Placeholder title
+              event.title,
               style: TextStyle(
                 color: isDark ? AppColors.lightBlueColor : AppColors.lightBlueColor,
                 fontSize: 24,
@@ -97,7 +106,7 @@ class EventDetailsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.lightBlueColor.withOpacity(0.2),
+                      color: AppColors.lightBlueColor.withValues(alpha: 0.2), // withValues update
                       borderRadius: BorderRadius.circular(12),
                     ),
                      child: const Icon(Icons.calendar_month, color: AppColors.lightBlueColor),
@@ -107,7 +116,7 @@ class EventDetailsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                         "21 January", // Placeholder
+                         event.date,
                          style: TextStyle(
                            color: isDark ? AppColors.whiteColor : AppColors.lightBlueColor,
                            fontWeight: FontWeight.bold,
@@ -115,7 +124,7 @@ class EventDetailsScreen extends StatelessWidget {
                          ),
                       ),
                       Text(
-                        "12:12 PM", // Placeholder
+                        event.time, 
                         style: TextStyle(
                           color: isDark ? AppColors.whiteColor : AppColors.blackColor,
                           fontSize: 14,
@@ -127,8 +136,6 @@ class EventDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            // Location Box (Optional based on design, design had map icon possibly?) 
-            // The design shows Date/Time, so sticking to that.
 
             const SizedBox(height: 16),
 
@@ -145,7 +152,7 @@ class EventDetailsScreen extends StatelessWidget {
             
             // Description Text
             Text(
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ...", // Placeholder description
+              event.description, 
               style: TextStyle(
                 color: isDark ? AppColors.whiteColor : AppColors.blackColor,
                 fontSize: 14,

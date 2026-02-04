@@ -4,7 +4,9 @@ import 'package:event_planning_app/providers/app_theme_provider.dart';
 import 'package:event_planning_app/utils/app_colors.dart';
 import 'package:event_planning_app/utils/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:event_planning_app/utils/app_assets.dart';
 import 'package:provider/provider.dart';
+
 
 class IntroScreen extends StatefulWidget {
   static const String routName = 'intro_screen';
@@ -73,7 +75,7 @@ class _IntroScreenState extends State<IntroScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Image.asset('assets/images/appbar logo.png'),
+        title: Image.asset(AppAssets.logoBg, height: 40),
         leading: IconButton(
           onPressed: () {
             if (currentIndex > 0) {

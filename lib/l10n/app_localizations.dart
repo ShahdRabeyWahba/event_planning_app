@@ -523,6 +523,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete Event'**
   String get deleteEvent;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email'**
+  String get invalidEmail;
+
+  /// No description provided for @emailEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter email'**
+  String get emailEmpty;
+
+  /// No description provided for @passwordEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter password'**
+  String get passwordEmpty;
+
+  /// No description provided for @passwordShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordShort;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Password doesn\'t match'**
+  String get passwordMismatch;
+
+  /// No description provided for @nameEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter name'**
+  String get nameEmpty;
+
+  /// No description provided for @loginSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Login Success'**
+  String get loginSuccess;
+
+  /// No description provided for @accountCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Created Successfully'**
+  String get accountCreated;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Ok'**
+  String get ok;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @userNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No user found for that email.'**
+  String get userNotFound;
+
+  /// No description provided for @wrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password provided for that user.'**
+  String get wrongPassword;
+
+  /// No description provided for @invalidCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email or password.'**
+  String get invalidCredential;
+
+  /// No description provided for @emailAlreadyInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'The account already exists for that email.'**
+  String get emailAlreadyInUse;
+
+  /// No description provided for @weakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'The password provided is too weak.'**
+  String get weakPassword;
+
+  /// No description provided for @networkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Please check your connection.'**
+  String get networkError;
+
+  /// No description provided for @continueAsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as Guest'**
+  String get continueAsGuest;
+
+  /// No description provided for @authDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Email/Password authentication is not enabled. Please contact support.'**
+  String get authDisabled;
+
+  /// No description provided for @confirmPasswordEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get confirmPasswordEmpty;
 }
 
 class _AppLocalizationsDelegate

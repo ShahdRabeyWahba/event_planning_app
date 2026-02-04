@@ -224,4 +224,65 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteEvent => 'حذف الفعالية';
+
+  @override
+  String get invalidEmail => 'يرجى إدخال بريد إلكتروني صحيح';
+
+  @override
+  String get emailEmpty => 'يرجى إدخال البريد الإلكتروني';
+
+  @override
+  String get passwordEmpty => 'يرجى إدخال كلمة المرور';
+
+  @override
+  String get passwordShort => 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
+
+  @override
+  String get passwordMismatch => 'كلمة المرور غير متطابقة';
+
+  @override
+  String get nameEmpty => 'يرجى إدخال الاسم';
+
+  @override
+  String get loginSuccess => 'تم تسجيل الدخول بنجاح';
+
+  @override
+  String get accountCreated => 'تم إنشاء الحساب بنجاح';
+
+  @override
+  String get error => 'خطأ';
+
+  @override
+  String get ok => 'تم';
+
+  @override
+  String get loading => 'جاري التحميل...';
+
+  @override
+  String get userNotFound => 'لا يوجد مستخدم مسجل بهذا البريد الإلكتروني.';
+
+  @override
+  String get wrongPassword => 'كلمة المرور غير صحيحة.';
+
+  @override
+  String get invalidCredential => 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+
+  @override
+  String get emailAlreadyInUse => 'هذا البريد الإلكتروني مستخدم بالفعل.';
+
+  @override
+  String get weakPassword => 'كلمة المرور ضعيفة جداً.';
+
+  @override
+  String get networkError => 'فشل الاتصال بالشبكة. يرجى التحقق من اتصالك.';
+
+  @override
+  String get continueAsGuest => 'الدخول كضيف';
+
+  @override
+  String get authDisabled =>
+      'خدمة تسجيل الدخول بالبريد الإلكتروني غير مفعلة حالياً. يرجى التواصل مع الدعم.';
+
+  @override
+  String get confirmPasswordEmpty => 'يرجى تأكيد كلمة المرور';
 }

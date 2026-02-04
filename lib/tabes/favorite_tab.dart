@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_planning_app/Firebase_utils.dart';
+import 'package:event_planning_app/models/event.dart';
 import 'package:event_planning_app/l10n/app_localizations.dart';
 import 'package:event_planning_app/providers/app_theme_provider.dart';
-import 'package:event_planning_app/providers/favorite_provider.dart';
 import 'package:event_planning_app/utils/app_colors.dart';
+import 'package:event_planning_app/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -52,53 +55,42 @@ class FavoriteTab extends StatelessWidget {
           ),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        children: [
-          _buildEventCard(
-            context,
-            localizations.jan21,
-            "Birthday",
-            localizations.birthdayDesc,
-            "assets/images/Birthday.png",
-          ),
-          _buildEventCard(
-            context,
-            localizations.jan22,
-            "Meeting",
-            localizations.meetingDesc,
-            "assets/images/Meeting.png",
-          ),
-          _buildEventCard(
-            context,
-            localizations.jan23,
-            "Exhibition",
-            localizations.exhibitionDesc,
-            "assets/images/Exhibition.png",
-          ),
-          _buildEventCard(
-            context,
-            localizations.jan24,
-            "Sport",
-            localizations.sport,
-            "assets/images/Sport.png",
-          ),
-          _buildEventCard(
-            context,
-            localizations.jan25,
-            "Sport",
-            localizations.bookClub,
-            "assets/images/Book Club.png",
-          ),
-          const SizedBox(height: 20),
-        ],
+      body: StreamBuilder<QuerySnapshot<Event>>(
+        stream: FirebaseUtils.getEventCollection().snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+           if (snapshot.hasError) {
+             return Center(child: Text("Something went wrong"));
+          }
+          var events = snapshot.data?.docs.map((e) => e.data()).toList() ?? [];
+          events = events.where((element) => element.isFavorite == true).toList();
+          if (events.isEmpty) {
+             return Center(child: Text("No favorites yet"));
+          }
+          
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            itemCount: events.length,
+            itemBuilder: (context, index) {
+              return _buildEventCard(context, events[index]);
+            },
+          );
+        },
       ),
     );
   }
 
-  Widget _buildEventCard(BuildContext context, String date, String title, String desc, String imagePath) {
+  Widget _buildEventCard(BuildContext context, Event event) {
     var themeProvider = Provider.of<AppThemeProvider>(context);
     bool isDark = themeProvider.isDarkMode();
+    
+    // Extract data
+    // Extract data
+    String date = event.date;
+    String desc = event.description;
+    String imagePath = event.imagePath;
 
     // Color Refinements
     Color themeBlue = isDark ? AppColors.lightBlueColor : AppColors.darkBgColor;
@@ -124,7 +116,11 @@ class FavoriteTab extends StatelessWidget {
           fit: BoxFit.cover,
         ),
       ),
-      child: Stack(
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(context, AppRoutes.eventDetailsRoute, arguments: event);
+        },
+        child: Stack(
         children: [
           Positioned(
             top: 12,
@@ -151,7 +147,7 @@ class FavoriteTab extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkBackgroundColor : AppColors.whiteColor,
+                color: isDark ? AppColors.darkBackgroundColor.withValues(alpha: 0.9) : AppColors.whiteColor,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
@@ -162,7 +158,7 @@ class FavoriteTab extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      desc,
+                      event.title,
                       style: TextStyle(
                         color: isDark ? AppColors.whiteColor : Colors.black,
                         fontWeight: FontWeight.bold,
@@ -171,26 +167,26 @@ class FavoriteTab extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Consumer<FavoriteProvider>(
-                    builder: (context, favProvider, child) {
-                      bool isFavorite = favProvider.isFavorite(title);
-                      return InkWell(
-                        onTap: () {
-                          favProvider.toggleFavorite(title);
-                        },
-                        child: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: themeBlue,
-                          size: 24,
-                        ),
-                      );
+                  // MARK: FAVORITE TOGGLE START
+                  InkWell(
+                    onTap: () {
+                      // Toggle Favorite in Firestore
+                      event.isFavorite = !event.isFavorite;
+                      FirebaseUtils.updateEvent(event);
                     },
-                  ),
+                    child: Icon(
+                      event.isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: AppColors.lightBlueColor,
+                      size: 24,
+                    ),
+                  )
+                  // MARK: FAVORITE TOGGLE END
                 ],
               ),
             ),
           ),
         ],
+      ),
       ),
     );
   }

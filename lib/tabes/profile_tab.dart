@@ -1,9 +1,12 @@
+import 'package:event_planning_app/Firebase_utils.dart';
 import 'package:event_planning_app/l10n/app_localizations.dart';
 import 'package:event_planning_app/language/language_bottom_sheet.dart';
 import 'package:event_planning_app/providers/app_language_provider.dart';
 import 'package:event_planning_app/providers/app_theme_provider.dart';
+import 'package:event_planning_app/providers/user_provider.dart';
 import 'package:event_planning_app/theme/theme_bottom_sheet.dart';
 import 'package:event_planning_app/utils/app_colors.dart';
+import 'package:event_planning_app/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,6 +24,7 @@ class _ProfileTabState extends State<ProfileTab> {
   Widget build(BuildContext context) {
     var languageProvider = Provider.of<AppLanguageProvider>(context);
     var themeProvider = Provider.of<AppThemeProvider>(context);
+    var userProvider = Provider.of<UserProvider>(context);
     var localizations = AppLocalizations.of(context)!;
 
     return SingleChildScrollView(
@@ -44,7 +48,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "John Safwat",
+                  userProvider.currentUser?.name ?? "Guest",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -54,9 +58,9 @@ class _ProfileTabState extends State<ProfileTab> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  "johnsafwat.route@gmail.com",
-                  style: TextStyle(
+                Text(
+                  userProvider.currentUser?.email ?? "",
+                  style: const TextStyle(
                     fontSize: 14,
                     color: AppColors.darkGrayColor,
                   ),
@@ -109,8 +113,13 @@ class _ProfileTabState extends State<ProfileTab> {
                     color: AppColors.redColor,
                     size: 20,
                   ),
-                  onTap: () {
-                    // Handle logout
+                  onTap: () async {
+                    await FirebaseUtils.logout();
+                    if (mounted) {
+                      userProvider.updateUser(null);
+                      Navigator.pushReplacementNamed(
+                          context, AppRoutes.splashRoute);
+                    }
                   },
                 ),
               ],

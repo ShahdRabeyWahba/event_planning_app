@@ -41,6 +41,14 @@ dependencies:
     sdk: flutter
   intl: any
   provider: ^6.1.5+1
+  firebase_core: ^4.4.0
+  cloud_firestore: ^6.1.2
+  firebase_auth: ^6.1.4
+  google_sign_in: ^6.2.2
+  awesome_dialog: ^3.2.1
+  fluttertoast: ^8.2.8
+  email_validator: ^2.1.1
+  shared_preferences: ^2.5.4
 
 dev_dependencies:
   flutter_test:

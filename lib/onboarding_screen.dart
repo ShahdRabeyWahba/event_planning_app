@@ -5,6 +5,7 @@ import 'package:event_planning_app/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:event_planning_app/l10n/app_localizations.dart';
+import 'package:event_planning_app/utils/app_assets.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -17,24 +18,7 @@ class OnboardingScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Image.asset('assets/images/appbar logo.png'),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        title: Image.asset(AppAssets.logoBg, height: 40),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -45,7 +29,7 @@ class OnboardingScreen extends StatelessWidget {
               const SizedBox(height: 20),
               Center(
                 child: Image.asset(
-                  'assets/images/being-creative.png',
+                  AppAssets.beingBg,
                   height: 300,
                   fit: BoxFit.contain,
                 ),
@@ -101,16 +85,16 @@ class OnboardingScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppColors.transparentColor, // Background always transparent as requested
+                              color: AppColors.transparentColor,
                               borderRadius: BorderRadius.circular(30),
                             ),
                             child: Icon(
                               Icons.wb_sunny,
                               color: themeProvider.appTheme == ThemeMode.light
-                                  ? AppColors.lightBlueColor // Selected (Light Blue)
+                                  ? AppColors.lightBlueColor
                                   : (themeProvider.appTheme == ThemeMode.dark 
                                       ? AppColors.whiteColor 
-                                      : AppColors.minGrayColor), // Unselected
+                                      : AppColors.minGrayColor),
                               size: 24,
                             ),
                           ),
@@ -123,16 +107,16 @@ class OnboardingScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppColors.transparentColor, // Background always transparent as requested
+                              color: AppColors.transparentColor,
                               borderRadius: BorderRadius.circular(30),
                             ),
                             child: Icon(
                               Icons.nightlight_round,
                               color: themeProvider.appTheme == ThemeMode.dark
-                                  ? AppColors.lightBlueColor // Selected (Light Blue)
+                                  ? AppColors.lightBlueColor
                                   : (themeProvider.appTheme == ThemeMode.light 
                                       ? AppColors.minGrayColor 
-                                      : AppColors.whiteColor), // Unselected
+                                      : AppColors.whiteColor),
                               size: 24,
                             ),
                           ),
@@ -172,17 +156,17 @@ class OnboardingScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppColors.transparentColor, // Background always transparent as requested
+                              color: AppColors.transparentColor,
                               borderRadius: BorderRadius.circular(30),
                             ),
                             child: Text(
                                  AppLocalizations.of(context)!.english,
                                    style: TextStyle(
                                      color: languageProvider.appLanguage == 'en'
-                                         ? AppColors.lightBlueColor // Selected (Light Blue)
+                                         ? AppColors.lightBlueColor
                                          : (themeProvider.appTheme == ThemeMode.dark 
                                              ? AppColors.whiteColor 
-                                             : AppColors.minGrayColor), // Unselected
+                                             : AppColors.minGrayColor),
                                      fontSize: 20
                                    ),
                                ),
@@ -197,17 +181,17 @@ class OnboardingScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppColors.transparentColor, // Background always transparent as requested
+                              color: AppColors.transparentColor,
                               borderRadius: BorderRadius.circular(30),
                             ),
                             child: Text(
                               AppLocalizations.of(context)!.arabic,
                                style: TextStyle(
                                  color: languageProvider.appLanguage == 'ar'
-                                     ? AppColors.lightBlueColor // Selected (Light Blue)
+                                     ? AppColors.lightBlueColor
                                      : (themeProvider.appTheme == ThemeMode.dark 
                                          ? AppColors.whiteColor 
-                                         : AppColors.minGrayColor), // Unselected
+                                         : AppColors.minGrayColor),
                                  fontSize: 20
                                ),
                             ),

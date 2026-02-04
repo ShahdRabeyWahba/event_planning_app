@@ -4,6 +4,9 @@ import 'package:event_planning_app/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:event_planning_app/Firebase_utils.dart';
+import 'package:event_planning_app/models/event.dart';
+
 class AddEventScreen extends StatefulWidget {
   static const String routeName = 'add_event_screen';
 
@@ -14,10 +17,15 @@ class AddEventScreen extends StatefulWidget {
 }
 
 class _AddEventScreenState extends State<AddEventScreen> {
+  var titleController = TextEditingController();
+  var descriptionController = TextEditingController();
+  var formKey = GlobalKey<FormState>();
+
   int selectedCategoryIndex = 0;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   String selectedImagePath = 'assets/images/Book Club.png';
+  bool isFavorite = false;
 
   final List<String> galleryImages = [
     'assets/images/Book Club.png',
@@ -97,188 +105,245 @@ class _AddEventScreenState extends State<AddEventScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Event Image Placeholder
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
-                  image: AssetImage(
-                    isDark 
-                        ? selectedImagePath.replaceAll('.png', ' dark.png') 
-                        : selectedImagePath,
+        child: Form(
+          key: formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Event Image Placeholder
+              Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  image: DecorationImage(
+                    image: AssetImage(
+                      isDark 
+                          ? selectedImagePath.replaceAll('.png', ' dark.png') 
+                          : selectedImagePath,
+                    ),
+                    fit: BoxFit.cover,
                   ),
-                  fit: BoxFit.cover,
                 ),
+                // You'd switch this image based on selectedCategoryIndex
               ),
-              // You'd switch this image based on selectedCategoryIndex
-            ),
-            const SizedBox(height: 16),
-            
-            // Category Tabs
-            SizedBox(
-              height: 40,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: categories.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  bool isSelected = selectedCategoryIndex == index;
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedCategoryIndex = index;
-                        selectedImagePath = galleryImages[index];
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isSelected 
-                            ? AppColors.lightBlueColor 
-                            : (isDark ? Colors.transparent : Colors.transparent),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: AppColors.lightBlueColor,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            categoryIcons[index],
-                            color: isSelected 
-                                ? AppColors.whiteColor 
-                                : AppColors.lightBlueColor,
-                            size: 20,    
+              const SizedBox(height: 16),
+              
+              // Category Tabs
+              SizedBox(
+                height: 40,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categories.length,
+                  separatorBuilder: (context, index) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    bool isSelected = selectedCategoryIndex == index;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedCategoryIndex = index;
+                          selectedImagePath = galleryImages[index];
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected 
+                              ? AppColors.lightBlueColor 
+                              : (isDark ? Colors.transparent : Colors.transparent),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppColors.lightBlueColor,
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            categories[index], 
-                            style: TextStyle(
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              categoryIcons[index],
                               color: isSelected 
                                   ? AppColors.whiteColor 
-                                  : (isDark ? AppColors.whiteColor : AppColors.blackColor),
-                              fontWeight: FontWeight.w500,
+                                  : AppColors.lightBlueColor,
+                              size: 20,    
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Text(
+                              categories[index], 
+                              style: TextStyle(
+                                color: isSelected 
+                                    ? AppColors.whiteColor 
+                                    : (isDark ? AppColors.whiteColor : AppColors.blackColor),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              const SizedBox(height: 16),
+              
+              const SizedBox(height: 24),
+              
+              // Title Field
+              Text(
+                localizations.eventTitle,
+                style: TextStyle(
+                  color: isDark ? AppColors.whiteColor : AppColors.blackColor,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: titleController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a title';
+                  }
+                  return null;
+                },
+                cursorColor: AppColors.lightBlueColor,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.edit, color: isDark ? AppColors.whiteColor : AppColors.blackColor),
+                  hintText: localizations.eventTitle,
+                  hintStyle: TextStyle(color: isDark ? AppColors.minGrayColor : AppColors.grayColor),
+                  filled: true,
+                  fillColor: isDark ? AppColors.darkBackgroundColor : AppColors.whiteColor,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppColors.grayColor),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppColors.grayColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.grayColor)
+                  ),
+                ),
+                style: TextStyle(color: isDark ? Colors.white : Colors.black),
+              ),
+              const SizedBox(height: 16),
+
+              // Description Field
+              Text(
+                localizations.eventDescription,
+                style: TextStyle(
+                  color: isDark ? AppColors.whiteColor : AppColors.blackColor,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: descriptionController,
+                validator: (value) {
+                   if (value == null || value.isEmpty) {
+                    return 'Please enter a description';
+                  }
+                  return null;
+                },
+                maxLines: 4,
+                cursorColor: AppColors.lightBlueColor,
+                decoration: InputDecoration(
+                  hintText: localizations.eventDescription,
+                  hintStyle: TextStyle(color: isDark ? AppColors.minGrayColor : AppColors.grayColor),
+                  filled: true,
+                  fillColor: isDark ? AppColors.darkBackgroundColor : AppColors.whiteColor, 
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppColors.grayColor),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppColors.grayColor),
+                  ),
+                   focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.grayColor)
+                  ),
+                ),
+                 style: TextStyle(color: isDark ? Colors.white : Colors.black),
+              ),
+              const SizedBox(height: 16),
+
+              // Date Picker
+              _buildDateRow(context, localizations, isDark),
+              const SizedBox(height: 16),
+
+               // Time Picker
+              _buildTimeRow(context, localizations, isDark),
+              const SizedBox(height: 16),
+
+              const SizedBox(height: 16),
+              
+              // Add Event Button
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: addEvent,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.darkBgColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            const SizedBox(height: 24),
-            
-            // Date Picker
-            _buildDateRow(context, localizations, isDark),
-            const SizedBox(height: 16),
-
-             // Time Picker
-            _buildTimeRow(context, localizations, isDark),
-            const SizedBox(height: 16),
-
-            // Title Field
-            Text(
-              localizations.eventTitle,
-              style: TextStyle(
-                color: isDark ? AppColors.whiteColor : AppColors.blackColor,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.edit, color: isDark ? AppColors.whiteColor : AppColors.blackColor),
-                hintText: localizations.eventTitle,
-                hintStyle: TextStyle(color: isDark ? AppColors.minGrayColor : AppColors.grayColor),
-                filled: true,
-                fillColor: isDark ? AppColors.darkBackgroundColor : AppColors.whiteColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppColors.grayColor),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppColors.grayColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.grayColor)
-                ),
-              ),
-              style: TextStyle(color: isDark ? AppColors.whiteColor : AppColors.blackColor),
-            ),
-            const SizedBox(height: 16),
-
-            // Description Field
-            Text(
-              localizations.eventDescription,
-              style: TextStyle(
-                color: isDark ? AppColors.whiteColor : AppColors.blackColor,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: localizations.eventDescription,
-                hintStyle: TextStyle(color: isDark ? AppColors.minGrayColor : AppColors.grayColor),
-                filled: true,
-                fillColor: isDark ? AppColors.darkBackgroundColor : AppColors.whiteColor, 
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppColors.grayColor),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppColors.grayColor),
-                ),
-                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.grayColor)
-                ),
-              ),
-               style: TextStyle(color: isDark ? AppColors.whiteColor : AppColors.blackColor),
-            ),
-            const SizedBox(height: 16),
-
-            const SizedBox(height: 16),
-            
-            // Add Eve..nt Button
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Add event logic here
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.darkBgColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
                   ),
-                ),
-                child: Text(
-                  localizations.addEvent,
-                  style: const TextStyle(
-                    color: AppColors.whiteColor,
-                    fontSize: 20,
+                  child: Text(
+                    localizations.addEvent,
+                    style: const TextStyle(
+                      color: AppColors.whiteColor,
+                      fontSize: 20,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void addEvent() {
+    if (formKey.currentState?.validate() == false) {
+      return;
+    }
+    /// validate data => valid
+    if (selectedDate == null || selectedTime == null) {
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select date and time')),
+      );
+      return;
+    }
+
+    Event event = Event(
+      title: titleController.text,
+      description: descriptionController.text,
+      date: "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}", // Storing as String for now as per previous model
+      time: selectedTime!.format(context),
+      category: categories[selectedCategoryIndex],
+      imagePath: selectedImagePath,
+      isFavorite: isFavorite,
+    );
+
+    FirebaseUtils.addEventToFirestore(event).then((value) {
+      if (!mounted) return;
+      // print('Event added successfully');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Event added successfully')),
+      );
+      Navigator.pop(context);
+    }).catchError((error) {
+       if (!mounted) return;
+       // print('Error adding event: $error');
+       ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error adding event: $error')),
+      );
+    });
   }
 
   Widget _buildDateRow(BuildContext context, AppLocalizations localizations, bool isDark) {

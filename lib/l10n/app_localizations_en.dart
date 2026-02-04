@@ -224,4 +224,65 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteEvent => 'Delete Event';
+
+  @override
+  String get invalidEmail => 'Please enter a valid email';
+
+  @override
+  String get emailEmpty => 'Please enter email';
+
+  @override
+  String get passwordEmpty => 'Please enter password';
+
+  @override
+  String get passwordShort => 'Password must be at least 6 characters';
+
+  @override
+  String get passwordMismatch => 'Password doesn\'t match';
+
+  @override
+  String get nameEmpty => 'Please enter name';
+
+  @override
+  String get loginSuccess => 'Login Success';
+
+  @override
+  String get accountCreated => 'Account Created Successfully';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get ok => 'Ok';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get userNotFound => 'No user found for that email.';
+
+  @override
+  String get wrongPassword => 'Wrong password provided for that user.';
+
+  @override
+  String get invalidCredential => 'Invalid email or password.';
+
+  @override
+  String get emailAlreadyInUse => 'The account already exists for that email.';
+
+  @override
+  String get weakPassword => 'The password provided is too weak.';
+
+  @override
+  String get networkError => 'Network error. Please check your connection.';
+
+  @override
+  String get continueAsGuest => 'Continue as Guest';
+
+  @override
+  String get authDisabled =>
+      'Email/Password authentication is not enabled. Please contact support.';
+
+  @override
+  String get confirmPasswordEmpty => 'Please confirm your password';
 }
